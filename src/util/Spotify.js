@@ -4,7 +4,6 @@ let userAccessToken = '';
 
 const Spotify = {
 
-
     getAccessToken() {
         if(userAccessToken) {
             return userAccessToken;
@@ -14,48 +13,41 @@ const Spotify = {
             window.setTimeout(() => userAccessToken = '', expiresIn * 1000);
             window.history.pushState('Access Token', null, '/');
         }else {
-            const authUri = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&scope=playlist-modify-public&redirect_uri=http://localhost:3000`;
-            console.log(authUri);
-            window.location.href = authUri;
+            const authUri = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&scope=playlist-modify-public&redirect_uri=http://localhost:3000`;            
+            window.location = authUri;
         }
     },
 
     search(term) {
         this.getAccessToken();
+
         let url = `https://api.spotify.com/v1/search?type=track&q=${term}`;
-        try{
-            const response = fetch(url, {
+
+        return fetch(url, {
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${userAccessToken}`
-                }            
-                
+                }
+            }).then(response => {
+                return response.json();
+            }).then(jsonResponse => {
+                if(jsonResponse.tracks){
+                    return jsonResponse.tracks.items.map(track => {
+                        return {
+                            id: track.id,
+                            artist: track.artists[0].name, 
+                            name: track.name, 
+                            album: track.album.name,
+                            URI: track.uri                            
+                        }                        
+                    });
+                }
             });
-
-            if(response.ok){
-                let jsonResponse = response.json();
-
-                let tracks = jsonResponse.tracks.items.map(track => {
-                    return {
-                        id: track.id,
-                        artist: track.artists[0].name, 
-                        name: track.name, 
-                        album: track.album.name, 
-                        URI: track.uri                        
-                    }
-                })
-
-s                return tracks;
-            }
-            throw new Error('Error retrieving information');
-        }catch(error){
-            console.log(error);
-        }
     },
 
     savePlaylist(name, tracks){
         this.getAccessToken();             
-
+        
         try{
             let headers = { 'Authorization': 'Bearer ' + userAccessToken };
             let urlUserInfo = 'https://api.spotify.com/v1/me';
@@ -91,8 +83,7 @@ s                return tracks;
         }catch(error){
             console.log(error);
         }
-    }
-    
+    }    
 };
 
 

@@ -10,36 +10,9 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {     
-      searchResults: [{
-          name: 'Tiny Dancer',
-          album: 'Elton John',
-          artist: 'Madman Across The Water',
-          id: 1
-        },
-        {
-          name: 'Tiny Dancer',
-          album: 'Tim McGraw',
-          artist: 'Love Story',
-          id: 2
-        }
-      ],
+      searchResults: [],
       playListName: 'New PlayList',
-      playListTracks:[{
-        name: 'Stronger',
-        artist: 'Britney Speaks',
-        album: 'Ooops',
-        id: 3
-      }, {
-        name: 'So Emotional',
-        artist: 'Whitney Houston',
-        album: 'Whitney',
-        id: 4
-      }, {
-        name: 'Its Not Right But Its Okay',
-        artist: 'Whitney Houston',
-        album: 'My Love Is Your Love',
-        id: 5
-      }]
+      playListTracks:[]
     };
 
     this.addTrack = this.addTrack.bind(this);
@@ -82,8 +55,19 @@ class App extends Component {
     
   }
 
-  search(term){
-    console.log(term);
+  search(term){  
+    
+    if(term !== ''){
+        Spotify.search(term).then(results => {                  
+        this.setState({        
+          searchResults: results
+        });
+      });  
+    }else{
+      this.setState({
+        searchResults: []
+      });
+    }      
   }
 
   render() {
